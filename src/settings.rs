@@ -1,3 +1,4 @@
+
 use serde::{Deserialize, Serialize};
 use once_cell::sync::Lazy;
 
@@ -194,7 +195,7 @@ pub static SETTINGS_ITEMS: Lazy<Vec<SettingsItem>> = Lazy::new(|| {
             .with_icon('🔑'),
         SettingsItem::new("Family & Other Users", Category::Accounts, LaunchType::MsSettings("otherusers".into()))
             .with_description("Add family members and other users")
-            .with_icon('👨‍👩‍👧‍👦'),
+            .with_icon('👨'),
             
         // Time & Language
         SettingsItem::new("Date & Time", Category::TimeLanguage, LaunchType::MsSettings("dateandtime".into()))

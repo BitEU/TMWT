@@ -4,9 +4,9 @@ use std::process::Command;
 use windows::{
     core::PCWSTR,
     Win32::{
-        Foundation::{HWND, LRESULT},
-        UI::Shell::{ShellExecuteW, SW_SHOWNORMAL},
-        UI::WindowsAndMessaging::MB_OK,
+        Foundation::HWND,
+        UI::Shell::ShellExecuteW,
+        UI::WindowsAndMessaging::SW_SHOWNORMAL,
     },
 };
 

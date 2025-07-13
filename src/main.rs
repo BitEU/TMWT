@@ -14,7 +14,8 @@ use ratatui::{
     backend::CrosstermBackend,
     Terminal,
 };
-use std::{io, panic};
+use std::{io, panic, time::Duration};                                                                                                                                                           │
+use crate::event::{Event, EventHandler};
 
 fn main() -> Result<()> {
     // Setup panic handler to restore terminal
@@ -23,9 +24,12 @@ fn main() -> Result<()> {
     // Setup terminal
     let mut terminal = setup_terminal()?;
     
+     // Create event handler                                                                                                                                                                     │
+ │   let event_handler = EventHandler::new(Duration::from_millis(250));
+
     // Create app and run
     let app = app::App::new();
-    let res = app::run_app(&mut terminal, app);
+    let res = app::run_app(&mut terminal, app, event_handler);
     
     // Restore terminal
     restore_terminal(&mut terminal)?;

@@ -1,14 +1,13 @@
 use crate::app::{App, FocusArea, InputMode};
 use ratatui::{
-    backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
+    widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
 
-pub fn draw<B: Backend>(f: &mut Frame<B>, app: &App) {
+pub fn draw(f: &mut Frame, app: &App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
@@ -23,7 +22,7 @@ pub fn draw<B: Backend>(f: &mut Frame<B>, app: &App) {
     draw_status_bar(f, app, chunks[2]);
 }
 
-fn draw_header<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn draw_header(f: &mut Frame, app: &App, area: Rect) {
     let header_text = if app.input_mode == InputMode::Search {
         vec![
             Span::raw("Windows System Settings TUI - "),
@@ -51,7 +50,7 @@ fn draw_header<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
     f.render_widget(header, area);
 }
 
-fn draw_main_content<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn draw_main_content(f: &mut Frame, app: &App, area: Rect) {
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(30), Constraint::Percentage(70)])
@@ -61,7 +60,7 @@ fn draw_main_content<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
     draw_items(f, app, chunks[1]);
 }
 
-fn draw_categories<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn draw_categories(f: &mut Frame, app: &App, area: Rect) {
     let categories: Vec<ListItem> = app
         .categories
         .iter()
@@ -117,7 +116,7 @@ fn draw_categories<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
     f.render_widget(categories_list, area);
 }
 
-fn draw_items<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn draw_items(f: &mut Frame, app: &App, area: Rect) {
     let items: Vec<ListItem> = app
         .filtered_items
         .iter()
@@ -192,7 +191,7 @@ fn draw_items<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
     }
 }
 
-fn draw_status_bar<B: Backend>(f: &mut Frame<B>, app: &App, area: Rect) {
+fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
     let status_text = if let Some(msg) = &app.status_message {
         msg.clone()
     } else {
