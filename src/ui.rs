@@ -29,6 +29,15 @@ fn draw_header(f: &mut Frame, app: &App, area: Rect) {
             Span::styled("Search: ", Style::default().fg(Color::Yellow)),
             Span::styled(&app.search_query, Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD)),
         ]
+    } else if app.input_mode == InputMode::Edit {
+        vec![
+            Span::styled(
+                "Windows System Settings TUI - Edit Mode",
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ]
     } else {
         vec![Span::styled(
             "Windows System Settings TUI",
@@ -97,7 +106,7 @@ fn draw_categories(f: &mut Frame, app: &App, area: Rect) {
         .borders(Borders::ALL)
         .title("Categories")
         .border_style(
-            if app.focus_area == FocusArea::Categories {
+            if app.focus_area == FocusArea::Categories && app.input_mode != InputMode::Edit {
                 Style::default().fg(Color::Yellow)
             } else {
                 Style::default().fg(Color::White)
@@ -124,6 +133,7 @@ fn draw_items(f: &mut Frame, app: &App, area: Rect) {
         .map(|(i, item)| {
             let icon = item.icon.unwrap_or('•');
             let admin_indicator = if item.requires_admin { " [Admin]" } else { "" };
+            let edit_indicator = if item.can_edit_inline { " ✏" } else { "" };
             
             let style = if i == app.item_index && app.focus_area == FocusArea::Items {
                 Style::default()
@@ -138,6 +148,7 @@ fn draw_items(f: &mut Frame, app: &App, area: Rect) {
                     Span::raw(format!("{} ", icon)),
                     Span::styled(&item.name, style),
                     Span::styled(admin_indicator, Style::default().fg(Color::Red)),
+                    Span::styled(edit_indicator, Style::default().fg(Color::Green)),
                 ]),
                 Line::from(vec![
                     Span::raw("  "),
@@ -160,7 +171,7 @@ fn draw_items(f: &mut Frame, app: &App, area: Rect) {
             "Search Results"
         })
         .border_style(
-            if app.focus_area == FocusArea::Items {
+            if app.focus_area == FocusArea::Items && app.input_mode != InputMode::Edit {
                 Style::default().fg(Color::Yellow)
             } else {
                 Style::default().fg(Color::White)
@@ -196,8 +207,15 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         msg.clone()
     } else {
         let help_text = match app.input_mode {
-            InputMode::Normal => "[Enter] Open  [Tab] Switch  [/] Search  [F1] Help  [q] Quit",
+            InputMode::Normal => {
+                if app.focus_area == FocusArea::Items {
+                    "[Enter] Open/Edit  [e] Edit  [Tab] Switch  [/] Search  [q] Quit"
+                } else {
+                    "[Enter] Select  [Tab] Switch  [/] Search  [q] Quit"
+                }
+            },
             InputMode::Search => "[Enter] Confirm  [Esc] Cancel  Type to search...",
+            InputMode::Edit => "Edit Mode Active - See edit panel for controls",
         };
         help_text.to_string()
     };
@@ -209,7 +227,14 @@ fn draw_status_bar(f: &mut Frame, app: &App, area: Rect) {
         format!("Filter: '{}'", app.search_query)
     };
     
-    let status_line = format!("Status: Ready | {} | {}", filter_status, items_count);
+    let editable_count = app.filtered_items.iter().filter(|i| i.can_edit_inline).count();
+    let edit_info = if editable_count > 0 {
+        format!(" | Editable: {} (✏)", editable_count)
+    } else {
+        String::new()
+    };
+    
+    let status_line = format!("Status: Ready | {} | {}{}", filter_status, items_count, edit_info);
     
     let chunks = Layout::default()
         .direction(Direction::Vertical)

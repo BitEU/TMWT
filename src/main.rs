@@ -3,6 +3,8 @@ mod settings;
 mod ui;
 mod launcher;
 mod event;
+mod edit_ui;
+mod settings_editor;
 
 use anyhow::Result;
 use crossterm::{
@@ -15,7 +17,7 @@ use ratatui::{
     Terminal,
 };
 use std::{io, panic, time::Duration};
-use crate::event::{Event, EventHandler};
+use crate::event::EventHandler;
 
 fn main() -> Result<()> {
     // Setup panic handler to restore terminal
