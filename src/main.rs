@@ -14,7 +14,7 @@ use ratatui::{
     backend::CrosstermBackend,
     Terminal,
 };
-use std::{io, panic, time::Duration};                                                                                                                                                           │
+use std::{io, panic, time::Duration};
 use crate::event::{Event, EventHandler};
 
 fn main() -> Result<()> {
@@ -24,8 +24,8 @@ fn main() -> Result<()> {
     // Setup terminal
     let mut terminal = setup_terminal()?;
     
-     // Create event handler                                                                                                                                                                     │
- │   let event_handler = EventHandler::new(Duration::from_millis(250));
+    // Create event handler
+    let event_handler = EventHandler::new(Duration::from_millis(250));
 
     // Create app and run
     let app = app::App::new();
