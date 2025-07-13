@@ -1,0 +1,26 @@
+{
+  "favorites": [
+    "Display Settings",
+    "Network Status",
+    "Windows Update"
+  ],
+  "recent_items": [],
+  "theme": {
+    "primary_color": "Yellow",
+    "secondary_color": "Cyan",
+    "background_color": "Black",
+    "text_color": "White"
+  },
+  "hotkeys": {
+    "F2": "Display Settings",
+    "F3": "Network Status",
+    "F4": "Sound Settings",
+    "F5": "Windows Update"
+  },
+  "preferences": {
+    "show_descriptions": true,
+    "show_icons": true,
+    "show_admin_badge": true,
+    "auto_search_clear": true
+  }
+}
