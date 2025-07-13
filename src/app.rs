@@ -225,15 +225,15 @@ pub fn run_app<B: Backend>(
                         },
                         KeyCode::Enter => {
                             if app.focus_area == FocusArea::Items {
-                                if let Some(item) = app.filtered_items.get(app.item_index) {
+                                if let Some(item) = app.filtered_items.get(app.item_index).cloned() {
                                     if item.can_edit_inline {
                                         // Try to enter edit mode
-                                        if let Err(e) = app.enter_edit_mode(item) {
+                                        if let Err(e) = app.enter_edit_mode(&item) {
                                             app.status_message = Some(format!("Error: {}", e));
                                         }
                                     } else {
                                         // Fall back to launching the settings panel
-                                        if let Err(e) = launcher::launch_setting(item) {
+                                        if let Err(e) = launcher::launch_setting(&item) {
                                             app.status_message = Some(format!("Error: {}", e));
                                         }
                                     }
@@ -243,9 +243,9 @@ pub fn run_app<B: Backend>(
                         KeyCode::Char('e') => {
                             // Quick edit shortcut
                             if app.focus_area == FocusArea::Items {
-                                if let Some(item) = app.filtered_items.get(app.item_index) {
+                                if let Some(item) = app.filtered_items.get(app.item_index).cloned() {
                                     if item.can_edit_inline {
-                                        if let Err(e) = app.enter_edit_mode(item) {
+                                        if let Err(e) = app.enter_edit_mode(&item) {
                                             app.status_message = Some(format!("Error: {}", e));
                                         }
                                     } else {
@@ -316,7 +316,7 @@ pub fn run_app<B: Backend>(
                                     }
                                 }
                                 KeyCode::Left => {
-                                    if let EditorType::Slider { min, max, step } = &edit_state.editor_type {
+                                    if let EditorType::Slider { min, max: _, step } = &edit_state.editor_type {
                                         if let Some(SettingValue::Float(val)) = &mut edit_state.pending_value {
                                             let adjustment = if key.modifiers.contains(KeyModifiers::SHIFT) {
                                                 step * 0.1
@@ -328,7 +328,7 @@ pub fn run_app<B: Backend>(
                                     }
                                 }
                                 KeyCode::Right => {
-                                    if let EditorType::Slider { min, max, step } = &edit_state.editor_type {
+                                    if let EditorType::Slider { min: _, max, step } = &edit_state.editor_type {
                                         if let Some(SettingValue::Float(val)) = &mut edit_state.pending_value {
                                             let adjustment = if key.modifiers.contains(KeyModifiers::SHIFT) {
                                                 step * 0.1

@@ -2,13 +2,14 @@ use anyhow::{Result, Context};
 use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::process::Command;
-use windows::Win32::{
-    Graphics::Gdi::*,
-    Foundation::*,
+use windows::{
+    core::PCWSTR,
+    Win32::Graphics::Gdi::*,
 };
+use crate::network_editor::*;
 
 /// Represents different types of setting values
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum SettingValue {
     Bool(bool),
     String(String),
@@ -54,7 +55,10 @@ pub enum EditorType {
 }
 
 /// Trait for implementing setting editors
-pub trait SettingEditor: Send + Sync {
+pub trait SettingEditor: Send + Sync + fmt::Debug {
+    /// Create a clone of the trait object
+    fn clone_box(&self) -> Box<dyn SettingEditor>;
+
     /// Get the current value of the setting
     fn get_current_value(&self) -> Result<SettingValue>;
     
@@ -74,7 +78,14 @@ pub trait SettingEditor: Send + Sync {
     fn requires_admin(&self) -> bool;
 }
 
+impl Clone for Box<dyn SettingEditor> {
+    fn clone(&self) -> Self {
+        self.clone_box()
+    }
+}
+
 /// Display settings editor implementation
+#[derive(Debug, Clone)]
 pub struct DisplaySettingsEditor;
 
 impl DisplaySettingsEditor {
@@ -130,6 +141,10 @@ impl DisplaySettingsEditor {
 }
 
 impl SettingEditor for DisplaySettingsEditor {
+    fn clone_box(&self) -> Box<dyn SettingEditor> {
+        Box::new(self.clone())
+    }
+
     fn get_current_value(&self) -> Result<SettingValue> {
         let (width, height, _) = self.get_current_display_mode()?;
         Ok(SettingValue::Resolution { width, height })
@@ -165,12 +180,12 @@ impl SettingEditor for DisplaySettingsEditor {
             dev_mode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
             
             unsafe {
-                let result = ChangeDisplaySettingsW(&dev_mode, CDS_TEST);
+                let result = ChangeDisplaySettingsW(Some(&dev_mode), CDS_TEST);
                 if result != DISP_CHANGE_SUCCESSFUL {
                     anyhow::bail!("Display mode test failed: {:?}", result);
                 }
                 
-                let result = ChangeDisplaySettingsW(&dev_mode, CDS_TYPE(0));
+                let result = ChangeDisplaySettingsW(Some(&dev_mode), CDS_TYPE(0));
                 if result != DISP_CHANGE_SUCCESSFUL {
                     anyhow::bail!("Failed to change display settings: {:?}", result);
                 }
@@ -200,6 +215,7 @@ impl SettingEditor for DisplaySettingsEditor {
 }
 
 /// Power plan settings editor
+#[derive(Debug, Clone)]
 pub struct PowerPlanEditor;
 
 impl PowerPlanEditor {
@@ -259,6 +275,10 @@ impl PowerPlanEditor {
 }
 
 impl SettingEditor for PowerPlanEditor {
+    fn clone_box(&self) -> Box<dyn SettingEditor> {
+        Box::new(self.clone())
+    }
+
     fn get_current_value(&self) -> Result<SettingValue> {
         let active_guid = self.get_active_plan()?;
         let plans = self.get_power_plans()?;
@@ -312,6 +332,7 @@ impl SettingEditor for PowerPlanEditor {
 }
 
 /// Default audio device editor
+#[derive(Debug, Clone)]
 pub struct AudioDeviceEditor;
 
 impl AudioDeviceEditor {
@@ -345,6 +366,10 @@ impl AudioDeviceEditor {
 }
 
 impl SettingEditor for AudioDeviceEditor {
+    fn clone_box(&self) -> Box<dyn SettingEditor> {
+        Box::new(self.clone())
+    }
+
     fn get_current_value(&self) -> Result<SettingValue> {
         // Simplified - would need Core Audio API for actual implementation
         Ok(SettingValue::Selection("Default Device".to_string()))
@@ -382,10 +407,6 @@ impl SettingEditor for AudioDeviceEditor {
         false
     }
 }
-
-// Re-export network editors
-mod network_editor;
-pub use network_editor::*;
 
 /// Factory function to create appropriate editor for a setting
 pub fn create_editor(setting_type: &str) -> Option<Box<dyn SettingEditor>> {

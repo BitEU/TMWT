@@ -5,6 +5,7 @@ mod launcher;
 mod event;
 mod edit_ui;
 mod settings_editor;
+mod network_editor;
 
 use anyhow::Result;
 use crossterm::{

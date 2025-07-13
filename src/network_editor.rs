@@ -3,6 +3,7 @@ use anyhow::{Context, Result};
 use std::process::Command;
 
 /// Network adapter enable/disable editor
+#[derive(Debug, Clone)]
 pub struct NetworkAdapterToggleEditor {
     adapter_name: String,
 }
@@ -24,6 +25,10 @@ impl NetworkAdapterToggleEditor {
 }
 
 impl SettingEditor for NetworkAdapterToggleEditor {
+    fn clone_box(&self) -> Box<dyn SettingEditor> {
+        Box::new(self.clone())
+    }
+
     fn get_current_value(&self) -> Result<SettingValue> {
         Ok(SettingValue::Bool(self.is_adapter_enabled()?))
     }
@@ -59,7 +64,7 @@ impl SettingEditor for NetworkAdapterToggleEditor {
     }
     
     fn validate_value(&self, value: &SettingValue) -> Result<bool> {
-        matches!(value, SettingValue::Bool(_))
+        Ok(matches!(value, SettingValue::Bool(_)))
     }
     
     fn get_editor_type(&self) -> EditorType {
@@ -72,6 +77,7 @@ impl SettingEditor for NetworkAdapterToggleEditor {
 }
 
 /// DNS server configuration editor
+#[derive(Debug, Clone)]
 pub struct DNSServerEditor {
     adapter_name: String,
 }
@@ -103,6 +109,10 @@ impl DNSServerEditor {
 }
 
 impl SettingEditor for DNSServerEditor {
+    fn clone_box(&self) -> Box<dyn SettingEditor> {
+        Box::new(self.clone())
+    }
+
     fn get_current_value(&self) -> Result<SettingValue> {
         Ok(SettingValue::Selection(self.get_current_dns()?))
     }
@@ -179,7 +189,7 @@ impl SettingEditor for DNSServerEditor {
     }
     
     fn validate_value(&self, value: &SettingValue) -> Result<bool> {
-        matches!(value, SettingValue::Selection(_))
+        Ok(matches!(value, SettingValue::Selection(_)))
     }
     
     fn get_editor_type(&self) -> EditorType {
@@ -192,6 +202,7 @@ impl SettingEditor for DNSServerEditor {
 }
 
 /// Wi-Fi power management editor
+#[derive(Debug, Clone)]
 pub struct WiFiPowerEditor;
 
 impl WiFiPowerEditor {
@@ -221,6 +232,10 @@ impl WiFiPowerEditor {
 }
 
 impl SettingEditor for WiFiPowerEditor {
+    fn clone_box(&self) -> Box<dyn SettingEditor> {
+        Box::new(self.clone())
+    }
+
     fn get_current_value(&self) -> Result<SettingValue> {
         Ok(SettingValue::Selection(self.get_power_saving_mode()?))
     }
